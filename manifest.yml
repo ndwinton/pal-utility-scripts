@@ -1,0 +1,8 @@
+---
+applications:
+- name: utilities
+  path: .
+#  random-route: true
+  buildpacks:
+  - staticfile_buildpack
+  memory: 64m
