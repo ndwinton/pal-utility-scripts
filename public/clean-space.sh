@@ -120,14 +120,16 @@ function deleteRemainingRoutes() {
   local space=$1
   local guid=$(cf space $space --guid)
   local route_info=$(cf curl /v2/spaces/$guid/routes?inline-relations-depth=1)
-  local hosts=$(echo "$route_info" | jq -r '.resources[].entity.host')
+  local routes=$(echo "$route_info" | jq -r '.resources[].entity | (.host + "." + .domain.entity.name)')
+  local route
   local host
   local domain
 
-  echo '# routes:' $hosts
-  for host in $hosts
+  echo '# routes:' $routes
+  for route in $routes
   do
-    domain=$(echo "$route_info" | jq -r '.resources[].entity | select(.host == "'$host'") | .domain.entity.name')
+    host=${route%%.*}
+    domain=${route#*.}
     perform cf delete-route -f $domain --hostname $host
   done
 }
